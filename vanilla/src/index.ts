@@ -21,9 +21,8 @@ export function isValidClosableParentheses(str: string): boolean {
                 compParens[char] !== stack[stack.length - 1]
             ) {
                 return false
-            } else {
-                stack.pop()
             }
+            stack.pop()
         }
     }
 
