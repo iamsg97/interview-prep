@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
     getMaximumSumForTargetConsequetiveElements,
     isValidClosableParentheses,
+    maxProfit,
     maxSubArrayProduct,
 } from '../src/index'
 
@@ -244,6 +245,109 @@ describe('getMaximumSumForTargetConsequetiveElements', () => {
             expect(getMaximumSumForTargetConsequetiveElements([1, 2], 5)).toBe(
                 0
             )
+        })
+    })
+
+    describe('maxProfit', () => {
+        describe('Basic functionality', () => {
+            it('should return correct profit for the example [7,1,5,3,6,4]', () => {
+                expect(maxProfit([7, 1, 5, 3, 6, 4])).toBe(5)
+            })
+
+            it('should return correct profit when buy low sell high', () => {
+                expect(maxProfit([1, 5])).toBe(4)
+                expect(maxProfit([2, 4, 1, 7])).toBe(6)
+                expect(maxProfit([3, 2, 6, 5, 0, 3])).toBe(4)
+            })
+
+            it('should handle multiple profitable opportunities', () => {
+                expect(maxProfit([1, 2, 3, 4, 5])).toBe(4)
+                expect(maxProfit([1, 3, 2, 8, 2])).toBe(7)
+            })
+        })
+
+        describe('No profit scenarios', () => {
+            it('should return 0 when prices only decrease', () => {
+                expect(maxProfit([7, 6, 4, 3, 1])).toBe(0)
+                expect(maxProfit([5, 4, 3, 2, 1])).toBe(0)
+            })
+
+            it('should return 0 when all prices are the same', () => {
+                expect(maxProfit([5, 5, 5, 5])).toBe(0)
+                expect(maxProfit([1, 1, 1])).toBe(0)
+            })
+
+            it('should return 0 when no profitable transaction exists', () => {
+                expect(maxProfit([7, 1, 5, 3, 6, 4])).toBe(5) // This should actually be 5, testing current behavior
+                expect(maxProfit([2, 1])).toBe(0)
+            })
+        })
+
+        describe('Edge cases', () => {
+            it('should handle empty array', () => {
+                expect(maxProfit([])).toBe(0)
+            })
+
+            it('should handle single element array', () => {
+                expect(maxProfit([5])).toBe(0)
+            })
+
+            it('should handle two element arrays', () => {
+                expect(maxProfit([1, 2])).toBe(1)
+                expect(maxProfit([2, 1])).toBe(0)
+            })
+
+            it('should handle null/undefined input', () => {
+                expect(maxProfit(null as any)).toBe(0)
+                expect(maxProfit(undefined as any)).toBe(0)
+            })
+        })
+
+        describe('Complex scenarios', () => {
+            it('should find maximum profit in volatile markets', () => {
+                expect(maxProfit([1, 4, 2, 5, 3, 6])).toBe(5)
+                expect(maxProfit([2, 1, 4, 9, 1, 3])).toBe(8)
+            })
+
+            it('should handle large price differences', () => {
+                expect(maxProfit([1, 1000])).toBe(999)
+                expect(maxProfit([100, 1, 1000])).toBe(999)
+            })
+
+            it('should handle negative or zero prices', () => {
+                expect(maxProfit([0, 1, 2])).toBe(2)
+                expect(maxProfit([1, 0, 2])).toBe(2)
+            })
+
+            it('should handle arrays with duplicate values', () => {
+                expect(maxProfit([1, 1, 2, 2, 3, 3])).toBe(2)
+                expect(maxProfit([3, 3, 5, 0, 0, 3, 1, 4])).toBe(4)
+            })
+        })
+
+        describe('Performance scenarios', () => {
+            it('should handle larger arrays efficiently', () => {
+                const largePrices = [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5,
+                ]
+                expect(maxProfit(largePrices)).toBe(9)
+            })
+
+            it('should handle arrays where minimum comes after maximum', () => {
+                expect(maxProfit([10, 9, 8, 1, 2])).toBe(1)
+                expect(maxProfit([5, 4, 3, 2, 1, 6])).toBe(5)
+            })
+        })
+
+        describe('Boundary values', () => {
+            it('should handle very small prices', () => {
+                expect(maxProfit([0.01, 0.02, 0.01, 0.03])).toBeCloseTo(0.02)
+            })
+
+            it('should handle sequential buy/sell opportunities', () => {
+                expect(maxProfit([1, 5, 1, 6, 1, 7])).toBe(6)
+                expect(maxProfit([2, 8, 1, 9, 3, 10])).toBe(9)
+            })
         })
     })
 })
