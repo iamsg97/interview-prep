@@ -135,3 +135,49 @@ export function maxProfit(prices: number[]): number {
     }
     return maxProfit
 }
+
+export function buyAndSellStock(prices: number[]): number {
+    if (!prices || prices.length <= 0) return 0
+    let maxProfit = 0
+    let bestBuyPrice = prices[0] ?? 0
+
+    for (let i = 1; i < prices.length; i++) {
+        if (prices[i] ?? 0 > bestBuyPrice) {
+            maxProfit = Math.max(maxProfit, (prices[i] ?? 0) - bestBuyPrice)
+        }
+        bestBuyPrice = Math.min(bestBuyPrice, prices[i] ?? 0)
+    }
+    return maxProfit
+}
+
+function test() {
+    const arr = [1, 2, 3]
+    for (var i = 0; i < arr.length; i++) {
+        ;(tmp => {
+            setTimeout(() => {
+                console.log(arr[tmp])
+            }, 100)
+        })(i)
+    }
+}
+
+export function createGetters(arr: number[]) {
+    const result = []
+    for (let i = 0; i < arr.length; i++) {
+        result.push(() => arr[i])
+    }
+    return result
+}
+
+export function logIndexAfterDelay(arr: number[]) {
+    for (let i = 0; i < arr.length; i++) {
+        setTimeout(
+            () => {
+                // closure effects here and not in the delay which is at the outside of the `setTimeout`
+                console.log(`Index ${i}: ${arr[i]}`)
+                console.debug('Delay consumed (ms):', (i + 1) * 100)
+            },
+            (i + 1) * 100
+        )
+    }
+}

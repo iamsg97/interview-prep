@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
+    buyAndSellStock,
+    createGetters,
     getMaximumSumForTargetConsequetiveElements,
     isValidClosableParentheses,
-    maxProfit,
+    logIndexAfterDelay,
     maxSubArrayProduct,
 } from '../src/index'
 
@@ -248,80 +250,80 @@ describe('getMaximumSumForTargetConsequetiveElements', () => {
         })
     })
 
-    describe('maxProfit', () => {
+    describe('buyAndSellStock', () => {
         describe('Basic functionality', () => {
             it('should return correct profit for the example [7,1,5,3,6,4]', () => {
-                expect(maxProfit([7, 1, 5, 3, 6, 4])).toBe(5)
+                expect(buyAndSellStock([7, 1, 5, 3, 6, 4])).toBe(5)
             })
 
             it('should return correct profit when buy low sell high', () => {
-                expect(maxProfit([1, 5])).toBe(4)
-                expect(maxProfit([2, 4, 1, 7])).toBe(6)
-                expect(maxProfit([3, 2, 6, 5, 0, 3])).toBe(4)
+                expect(buyAndSellStock([1, 5])).toBe(4)
+                expect(buyAndSellStock([2, 4, 1, 7])).toBe(6)
+                expect(buyAndSellStock([3, 2, 6, 5, 0, 3])).toBe(4)
             })
 
             it('should handle multiple profitable opportunities', () => {
-                expect(maxProfit([1, 2, 3, 4, 5])).toBe(4)
-                expect(maxProfit([1, 3, 2, 8, 2])).toBe(7)
+                expect(buyAndSellStock([1, 2, 3, 4, 5])).toBe(4)
+                expect(buyAndSellStock([1, 3, 2, 8, 2])).toBe(7)
             })
         })
 
         describe('No profit scenarios', () => {
             it('should return 0 when prices only decrease', () => {
-                expect(maxProfit([7, 6, 4, 3, 1])).toBe(0)
-                expect(maxProfit([5, 4, 3, 2, 1])).toBe(0)
+                expect(buyAndSellStock([7, 6, 4, 3, 1])).toBe(0)
+                expect(buyAndSellStock([5, 4, 3, 2, 1])).toBe(0)
             })
 
             it('should return 0 when all prices are the same', () => {
-                expect(maxProfit([5, 5, 5, 5])).toBe(0)
-                expect(maxProfit([1, 1, 1])).toBe(0)
+                expect(buyAndSellStock([5, 5, 5, 5])).toBe(0)
+                expect(buyAndSellStock([1, 1, 1])).toBe(0)
             })
 
             it('should return 0 when no profitable transaction exists', () => {
-                expect(maxProfit([7, 1, 5, 3, 6, 4])).toBe(5) // This should actually be 5, testing current behavior
-                expect(maxProfit([2, 1])).toBe(0)
+                expect(buyAndSellStock([7, 1, 5, 3, 6, 4])).toBe(5) // This should actually be 5, testing current behavior
+                expect(buyAndSellStock([2, 1])).toBe(0)
             })
         })
 
         describe('Edge cases', () => {
             it('should handle empty array', () => {
-                expect(maxProfit([])).toBe(0)
+                expect(buyAndSellStock([])).toBe(0)
             })
 
             it('should handle single element array', () => {
-                expect(maxProfit([5])).toBe(0)
+                expect(buyAndSellStock([5])).toBe(0)
             })
 
             it('should handle two element arrays', () => {
-                expect(maxProfit([1, 2])).toBe(1)
-                expect(maxProfit([2, 1])).toBe(0)
+                expect(buyAndSellStock([1, 2])).toBe(1)
+                expect(buyAndSellStock([2, 1])).toBe(0)
             })
 
             it('should handle null/undefined input', () => {
-                expect(maxProfit(null as any)).toBe(0)
-                expect(maxProfit(undefined as any)).toBe(0)
+                expect(buyAndSellStock(null as any)).toBe(0)
+                expect(buyAndSellStock(undefined as any)).toBe(0)
             })
         })
 
         describe('Complex scenarios', () => {
             it('should find maximum profit in volatile markets', () => {
-                expect(maxProfit([1, 4, 2, 5, 3, 6])).toBe(5)
-                expect(maxProfit([2, 1, 4, 9, 1, 3])).toBe(8)
+                expect(buyAndSellStock([1, 4, 2, 5, 3, 6])).toBe(5)
+                expect(buyAndSellStock([2, 1, 4, 9, 1, 3])).toBe(8)
             })
 
             it('should handle large price differences', () => {
-                expect(maxProfit([1, 1000])).toBe(999)
-                expect(maxProfit([100, 1, 1000])).toBe(999)
+                expect(buyAndSellStock([1, 1000])).toBe(999)
+                expect(buyAndSellStock([100, 1, 1000])).toBe(999)
             })
 
             it('should handle negative or zero prices', () => {
-                expect(maxProfit([0, 1, 2])).toBe(2)
-                expect(maxProfit([1, 0, 2])).toBe(2)
+                expect(buyAndSellStock([0, 1, 2])).toBe(2)
+                expect(buyAndSellStock([1, 0, 2])).toBe(2)
             })
 
             it('should handle arrays with duplicate values', () => {
-                expect(maxProfit([1, 1, 2, 2, 3, 3])).toBe(2)
-                expect(maxProfit([3, 3, 5, 0, 0, 3, 1, 4])).toBe(4)
+                expect(buyAndSellStock([1, 1, 2, 2, 3, 3])).toBe(2)
+                expect(buyAndSellStock([3, 3, 5, 0, 0, 3, 1, 4])).toBe(4)
             })
         })
 
@@ -330,24 +332,120 @@ describe('getMaximumSumForTargetConsequetiveElements', () => {
                 const largePrices = [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5,
                 ]
-                expect(maxProfit(largePrices)).toBe(9)
+                expect(buyAndSellStock(largePrices)).toBe(9)
             })
 
             it('should handle arrays where minimum comes after maximum', () => {
-                expect(maxProfit([10, 9, 8, 1, 2])).toBe(1)
-                expect(maxProfit([5, 4, 3, 2, 1, 6])).toBe(5)
+                expect(buyAndSellStock([10, 9, 8, 1, 2])).toBe(1)
+                expect(buyAndSellStock([5, 4, 3, 2, 1, 6])).toBe(5)
             })
         })
 
         describe('Boundary values', () => {
             it('should handle very small prices', () => {
-                expect(maxProfit([0.01, 0.02, 0.01, 0.03])).toBeCloseTo(0.02)
+                expect(buyAndSellStock([0.01, 0.02, 0.01, 0.03])).toBeCloseTo(
+                    0.02
+                )
             })
 
             it('should handle sequential buy/sell opportunities', () => {
-                expect(maxProfit([1, 5, 1, 6, 1, 7])).toBe(6)
-                expect(maxProfit([2, 8, 1, 9, 3, 10])).toBe(9)
+                expect(buyAndSellStock([1, 5, 1, 6, 1, 7])).toBe(6)
+                expect(buyAndSellStock([2, 8, 1, 9, 3, 10])).toBe(9)
             })
         })
+    })
+})
+
+describe('createGetters', () => {
+    it('returns an array of functions with same length as input', () => {
+        const nums = [10, 20, 30]
+        const getters = createGetters(nums)
+        expect(Array.isArray(getters)).toBe(true)
+        expect(getters.length).toBe(nums.length)
+        expect(typeof getters[0]).toBe('function')
+    })
+
+    it('each getter returns the corresponding element by index', () => {
+        const nums = [10, 20, 30]
+        const getters = createGetters(nums)
+        expect(getters[0]?.()).toBe(10)
+        expect(getters[1]?.()).toBe(20)
+        expect(getters[2]?.()).toBe(30)
+    })
+
+    it('getters reflect later mutations to the original array', () => {
+        const nums = [1, 2, 3]
+        const getters = createGetters(nums)
+        nums[0] = 42
+        expect(getters[0]?.()).toBe(42)
+        nums.push(99)
+        // existing getters for indices beyond original length are undefined
+        expect(getters[3]).toBeUndefined()
+    })
+
+    it('handles empty array', () => {
+        const nums: number[] = []
+        const getters = createGetters(nums)
+        expect(getters.length).toBe(0)
+    })
+
+    it('existing getters return undefined if element is removed', () => {
+        const nums = [7, 8, 9]
+        const getters = createGetters(nums)
+        // remove last element
+        nums.pop()
+        expect(getters[2]?.()).toBeUndefined()
+        // earlier getters still work
+        expect(getters[0]?.()).toBe(7)
+    })
+})
+
+describe('logIndexAfterDelay', () => {
+    it('schedules timeouts and logs expected messages', () => {
+        // Some test environments may not expose vi.useFakeTimers; mock setTimeout directly
+        const arr = [10, 20, 30]
+
+        const originalSetTimeout = global.setTimeout
+        const setTimeoutMock = vi
+            .spyOn(
+                global as unknown as { setTimeout: typeof setTimeout },
+                'setTimeout'
+            )
+            .mockImplementation((...args: unknown[]) => {
+                // call callback synchronously to make behavior deterministic
+                const cb = args[0] as (() => void) | undefined
+                if (cb) {
+                    try {
+                        cb()
+                    } catch {
+                        // ignore
+                    }
+                }
+                // return a real timer object (satisfies NodeJS.Timeout) then clear it
+                const timer = originalSetTimeout(() => {}, 0)
+                clearTimeout(timer)
+                return timer
+            })
+
+        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
+
+        logIndexAfterDelay(arr)
+
+        // three timers should be scheduled
+        expect(setTimeoutMock).toHaveBeenCalledTimes(arr.length)
+
+        // callbacks were invoked synchronously by our mock
+        expect(logSpy).toHaveBeenCalledWith('Index 0: 10')
+        expect(debugSpy).toHaveBeenCalledWith('Delay consumed (ms):', 100)
+        expect(logSpy).toHaveBeenCalledWith('Index 1: 20')
+        expect(debugSpy).toHaveBeenCalledWith('Delay consumed (ms):', 200)
+        expect(logSpy).toHaveBeenCalledWith('Index 2: 30')
+        expect(debugSpy).toHaveBeenCalledWith('Delay consumed (ms):', 300)
+
+        // clean up / restore
+        setTimeoutMock.mockRestore()
+        logSpy.mockRestore()
+        debugSpy.mockRestore()
     })
 })
