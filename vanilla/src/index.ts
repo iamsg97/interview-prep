@@ -152,6 +152,8 @@ export function buyAndSellStock(prices: number[]): number {
 
 function test() {
     const arr = [1, 2, 3]
+    // biome-ignore lint/style/noVar: the problem is deliberately solved using IIFE (ES5 standard)
+    // biome-ignore lint/correctness/noInnerDeclarations: the problem is deliberately solved using IIFE (ES5 standard)
     for (var i = 0; i < arr.length; i++) {
         ;(tmp => {
             setTimeout(() => {
