@@ -183,3 +183,18 @@ export function logIndexAfterDelay(arr: number[]) {
         )
     }
 }
+
+export function delayedCounter(n: number) {
+  const promises = [];
+
+  for (let i = 0; i < n; i++) {
+    const p = new Promise((resolve) => {
+      // @ts-ignore
+      setTimeout(() => {
+        resolve(i);
+      }, i * 100);
+    });
+    promises.push(p);
+  }
+  return promises;
+}

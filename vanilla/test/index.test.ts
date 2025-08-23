@@ -1,7 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi, vi } from 'vitest'
 import {
     buyAndSellStock,
     createGetters,
+    delayedCounter,
     getMaximumSumForTargetConsequetiveElements,
     isValidClosableParentheses,
     logIndexAfterDelay,
@@ -447,5 +448,99 @@ describe('logIndexAfterDelay', () => {
         setTimeoutMock.mockRestore()
         logSpy.mockRestore()
         debugSpy.mockRestore()
+    })
+})
+describe('delayedCounter', () => {
+    afterEach(() => {
+        // restore real timers after each test when available; otherwise do a best-effort cleanup
+        if (typeof vi.useRealTimers === 'function') {
+            vi.useRealTimers()
+            return
+        }
+
+        // Fallback: try to flush/clear any pending fake timers to avoid cross-test leakage
+        try {
+            if (typeof vi.runAllTimers === 'function') vi.runAllTimers()
+            if (typeof vi.clearAllTimers === 'function') vi.clearAllTimers()
+        } catch (e) {
+            // noop - if timers API isn't present we can't do more
+        }
+    })
+
+    it('returns an empty array for n = 0', () => {
+        const promises = delayedCounter(0)
+        expect(Array.isArray(promises)).toBe(true)
+        expect(promises).toHaveLength(0)
+    })
+
+    it('each entry is a promise-like object', () => {
+        const promises = delayedCounter(3)
+        expect(promises).toHaveLength(3)
+        for (const p of promises) {
+            expect(typeof (p as any).then).toBe('function')
+        }
+    })
+
+    it('resolves each promise to its index after the expected delay (stepwise)', async () => {
+        const useFake = typeof vi.useFakeTimers === 'function'
+        if (useFake) vi.useFakeTimers()
+
+        const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+        const promises = delayedCounter(3)
+
+        // immediately advance 0ms timers and flush microtasks so 0-index resolves
+        if (useFake && typeof vi.advanceTimersByTime === 'function') {
+            vi.advanceTimersByTime(0)
+            await Promise.resolve()
+        } else {
+            await sleep(0)
+        }
+        await expect(promises[0]).resolves.toBe(0)
+
+        // advance another 100ms for index 1
+        if (useFake && typeof vi.advanceTimersByTime === 'function') {
+            vi.advanceTimersByTime(100)
+            await Promise.resolve()
+        } else {
+            await sleep(100)
+        }
+        await expect(promises[1]).resolves.toBe(1)
+
+        // advance another 100ms for index 2
+        if (useFake && typeof vi.advanceTimersByTime === 'function') {
+            vi.advanceTimersByTime(100)
+            await Promise.resolve()
+        } else {
+            await sleep(100)
+        }
+        await expect(promises[2]).resolves.toBe(2)
+    })
+
+    it('all promises resolve to increasing indices when timers run to completion', async () => {
+        const useFake = typeof vi.useFakeTimers === 'function'
+        if (useFake) vi.useFakeTimers()
+
+        const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+        const n = 5
+        const promises = delayedCounter(n)
+
+        // run all timers (0,100,200,300,400) or wait the equivalent real time
+        if (useFake && typeof vi.runAllTimers === 'function') {
+            vi.runAllTimers()
+            await Promise.resolve()
+        } else {
+            await sleep(n * 100)
+            await Promise.resolve()
+        }
+
+        const results = await Promise.all(promises as Promise<number>[])
+        expect(results).toEqual(Array.from({ length: n }, (_, i) => i))
+    })
+
+    it('handles negative or non-positive n by returning an empty array', () => {
+        expect(delayedCounter(-1)).toHaveLength(0)
+        expect(delayedCounter(undefined as any)).toHaveLength(0)
     })
 })
