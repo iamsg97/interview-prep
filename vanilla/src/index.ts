@@ -288,4 +288,3 @@ function countFrequency(sentence: string) {
             return acc
         }, /** @description what is going to be the start value */ new Map<string, number>())
 }
-countFrequency('apple banana apple orange banana apple')
