@@ -214,3 +214,78 @@ function delayedCounterAfain(n: number) {
         })
     })
 }
+
+/**
+ * Calculates the total savings of all people in the provided array using the `reduce` method.
+ *
+ * The `reduce` function iterates over the `peoples` array, accumulating the sum of the `savings` property
+ * from each object. The accumulator (`prev`) starts at the value of `initialVal` (0), and for each iteration,
+ * the current person's `savings` is added to the accumulator.
+ *
+ * The `reduce` function also does not mutate the original array
+ *
+ * Syntax explanation:
+ * - `peoples.reduce((prev, people) => prev + people.savings, initialVal)`:
+ *   - The first argument is a callback function with two parameters:
+ *     - `prev`: The accumulator, which holds the running total.
+ *     - `people`: The current element being processed in the array.
+ *   - The callback returns the updated accumulator value for the next iteration.
+ *   - The second argument (`initialVal`) sets the initial value of the accumulator.
+ *
+ * @param peoples - An array of objects, each containing a `name` and `savings` property.
+ * @returns The total sum of the `savings` values from all people in the array.
+ */
+function learnReduce(peoples: { name: string; savings: number }[]) {
+    const userWithMaxSaving = peoples.reduce((prev, curr) => {
+        // loops over the peoples, curr is the ith index and prev is (i - 1)th index
+        if (curr.savings > prev.savings) {
+            return curr
+        }
+        return prev
+    })
+    return userWithMaxSaving
+}
+
+/**
+ * Counts the frequency of each word in a given sentence using the `reduce` function.
+ *
+ * This function splits the input sentence into words (by spaces), then iterates over each word,
+ * accumulating their counts in a `Map<string, number>`. For each word, it checks if the word
+ * already exists in the map:
+ * - If it does, it increments the count by 1.
+ * - If it does not, it initializes the count to 1.
+ *
+ * The `reduce` function is used to build up the frequency map as it processes each word in the array.
+ *
+ * @param sentence - The input string containing words separated by spaces.
+ * @returns A `Map` where each key is a word from the sentence and the value is the number of times it appears.
+ *
+ * @example
+ * ```typescript
+ * const freq = countFrequency('apple banana apple orange banana apple');
+ * // freq.get('apple') === 3
+ * // freq.get('banana') === 2
+ * // freq.get('orange') === 1
+ * ```
+ */
+/**
+ * Checks if the input string contains valid, closable parentheses/braces/brackets.
+ * @param str - The string to validate.
+ * @returns True if the string is valid, false otherwise.
+ */
+function countFrequency(sentence: string) {
+    // acc -> what you want to do
+    // in this it has to be a map
+    return sentence
+        .split(' ')
+        .reduce((acc: Map<string, number>, word: string) => {
+            if (acc.has(word)) {
+                const curr: number = acc.get(word) ?? 0
+                acc.set(word, curr + 1)
+            } else {
+                acc.set(word, 1)
+            }
+            return acc
+        }, /** @description what is going to be the start value */ new Map<string, number>())
+}
+countFrequency('apple banana apple orange banana apple')
