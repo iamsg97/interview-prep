@@ -185,16 +185,32 @@ export function logIndexAfterDelay(arr: number[]) {
 }
 
 export function delayedCounter(n: number) {
-  const promises = [];
+    const promises = []
 
-  for (let i = 0; i < n; i++) {
-    const p = new Promise((resolve) => {
-      // @ts-ignore
-      setTimeout(() => {
-        resolve(i);
-      }, i * 100);
-    });
-    promises.push(p);
-  }
-  return promises;
+    for (let i = 0; i < n; i++) {
+        const p = new Promise(resolve => {
+            // @ts-ignore
+            setTimeout(() => {
+                resolve(i)
+            }, i * 100)
+        })
+        promises.push(p)
+    }
+    return promises
+}
+
+/**
+ *
+ * @param n number
+ * @returns Promise<number>[]
+ * @description difference from the above one, this uses `Array.from()`
+ */
+function delayedCounterAfain(n: number) {
+    return Array.from({ length: n }, (_, i) => {
+        return new Promise<number>(resolve => {
+            setTimeout(() => {
+                resolve(i)
+            }, i * 100)
+        })
+    })
 }
