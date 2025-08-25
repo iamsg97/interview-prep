@@ -1,10 +1,12 @@
-import { afterEach, describe, expect, it, vi, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
     buyAndSellStock,
+    countFrequency,
     createGetters,
     delayedCounter,
     getMaximumSumForTargetConsequetiveElements,
     isValidClosableParentheses,
+    learnReduce,
     logIndexAfterDelay,
     maxSubArrayProduct,
 } from '../src/index'
@@ -542,5 +544,296 @@ describe('delayedCounter', () => {
     it('handles negative or non-positive n by returning an empty array', () => {
         expect(delayedCounter(-1)).toHaveLength(0)
         expect(delayedCounter(undefined as any)).toHaveLength(0)
+    })
+})
+describe('countFrequency', () => {
+    it('should count word frequency in a simple sentence', () => {
+        const result = countFrequency('apple banana apple orange banana apple')
+
+        expect(result.get('apple')).toBe(3)
+        expect(result.get('banana')).toBe(2)
+        expect(result.get('orange')).toBe(1)
+        expect(result.size).toBe(3)
+    })
+
+    it('should handle empty string', () => {
+        const result = countFrequency('')
+
+        expect(result.get('')).toBe(1)
+        expect(result.size).toBe(1)
+    })
+
+    it('should handle single word', () => {
+        const result = countFrequency('hello')
+
+        expect(result.get('hello')).toBe(1)
+        expect(result.size).toBe(1)
+    })
+
+    it('should handle repeated single word', () => {
+        const result = countFrequency('hello hello hello')
+
+        expect(result.get('hello')).toBe(3)
+        expect(result.size).toBe(1)
+    })
+
+    it('should be case sensitive', () => {
+        const result = countFrequency('Hello hello HELLO')
+
+        expect(result.get('Hello')).toBe(1)
+        expect(result.get('hello')).toBe(1)
+        expect(result.get('HELLO')).toBe(1)
+        expect(result.size).toBe(3)
+    })
+
+    it('should handle multiple spaces as separate words', () => {
+        const result = countFrequency('word  word')
+
+        expect(result.get('word')).toBe(2)
+        expect(result.get('')).toBe(1) // empty string from double space
+        expect(result.size).toBe(2)
+    })
+
+    it('should handle punctuation as part of words', () => {
+        const result = countFrequency('hello, world! hello world!')
+
+        expect(result.get('hello,')).toBe(1)
+        expect(result.get('world!')).toBe(2)
+        expect(result.get('hello')).toBe(1)
+        expect(result.size).toBe(3)
+    })
+
+    it('should handle numbers', () => {
+        const result = countFrequency('123 456 123')
+
+        expect(result.get('123')).toBe(2)
+        expect(result.get('456')).toBe(1)
+        expect(result.size).toBe(2)
+    })
+
+    it('should handle special characters', () => {
+        const result = countFrequency('@ # $ @ #')
+
+        expect(result.get('@')).toBe(2)
+        expect(result.get('#')).toBe(2)
+        expect(result.get('$')).toBe(1)
+        expect(result.size).toBe(3)
+    })
+
+    it('should handle very long sentence', () => {
+        const longSentence = Array(1000).fill('word').join(' ')
+        const result = countFrequency(longSentence)
+
+        expect(result.get('word')).toBe(1000)
+        expect(result.size).toBe(1)
+    })
+
+    it('should return Map instance', () => {
+        const result = countFrequency('test')
+
+        expect(result).toBeInstanceOf(Map)
+    })
+
+    it('should handle unicode characters', () => {
+        const result = countFrequency('café naïve café résumé naïve')
+
+        expect(result.get('café')).toBe(2)
+        expect(result.get('naïve')).toBe(2)
+        expect(result.get('résumé')).toBe(1)
+        expect(result.size).toBe(3)
+    })
+
+    it('should handle leading and trailing spaces', () => {
+        const result = countFrequency(' hello world ')
+
+        expect(result.get('hello')).toBe(1)
+        expect(result.get('world')).toBe(1)
+        expect(result.get('')).toBe(2) // from leading and trailing spaces
+        expect(result.size).toBe(3)
+    })
+})
+
+describe('learnReduce', () => {
+    it('should find person with maximum savings in basic scenario', () => {
+        const peoples = [
+            { name: 'Alice', savings: 1000 },
+            { name: 'Bob', savings: 1500 },
+            { name: 'Charlie', savings: 800 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Bob')
+        expect(result.savings).toBe(1500)
+    })
+
+    it('should return first person when all have same savings', () => {
+        const peoples = [
+            { name: 'Alice', savings: 1000 },
+            { name: 'Bob', savings: 1000 },
+            { name: 'Charlie', savings: 1000 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Alice')
+        expect(result.savings).toBe(1000)
+    })
+
+    it('should handle single person array', () => {
+        const peoples = [{ name: 'Alice', savings: 500 }]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Alice')
+        expect(result.savings).toBe(500)
+    })
+
+    it('should handle negative savings values', () => {
+        const peoples = [
+            { name: 'Alice', savings: -1000 },
+            { name: 'Bob', savings: -500 },
+            { name: 'Charlie', savings: -2000 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Bob')
+        expect(result.savings).toBe(-500)
+    })
+
+    it('should handle mixed positive and negative savings', () => {
+        const peoples = [
+            { name: 'Alice', savings: -100 },
+            { name: 'Bob', savings: 200 },
+            { name: 'Charlie', savings: -50 },
+            { name: 'Dave', savings: 150 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Bob')
+        expect(result.savings).toBe(200)
+    })
+
+    it('should handle zero savings', () => {
+        const peoples = [
+            { name: 'Alice', savings: 0 },
+            { name: 'Bob', savings: -100 },
+            { name: 'Charlie', savings: 50 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Charlie')
+        expect(result.savings).toBe(50)
+    })
+
+    it('should handle decimal savings values', () => {
+        const peoples = [
+            { name: 'Alice', savings: 100.5 },
+            { name: 'Bob', savings: 100.75 },
+            { name: 'Charlie', savings: 100.25 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Bob')
+        expect(result.savings).toBe(100.75)
+    })
+
+    it('should handle very large savings values', () => {
+        const peoples = [
+            { name: 'Alice', savings: 1000000 },
+            { name: 'Bob', savings: 999999999 },
+            { name: 'Charlie', savings: 500000 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Bob')
+        expect(result.savings).toBe(999999999)
+    })
+
+    it('should return exact object reference from input array', () => {
+        const alice = { name: 'Alice', savings: 1000 }
+        const bob = { name: 'Bob', savings: 1500 }
+        const peoples = [alice, bob]
+
+        const result = learnReduce(peoples)
+        expect(result).toBe(bob) // exact reference check
+    })
+
+    it('should handle objects with additional properties', () => {
+        const peoples = [
+            { name: 'Alice', savings: 1000, age: 25, city: 'NYC' },
+            { name: 'Bob', savings: 1500, age: 30, city: 'LA' },
+            { name: 'Charlie', savings: 800, age: 35, city: 'Chicago' },
+        ] as { name: string; savings: number; age?: number; city?: string }[]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Bob')
+        expect(result.savings).toBe(1500)
+        expect((result as any).age).toBe(30)
+        expect((result as any).city).toBe('LA')
+    })
+
+    it('should handle array with duplicates but different references', () => {
+        const peoples = [
+            { name: 'Alice', savings: 1000 },
+            { name: 'Bob', savings: 1000 },
+            { name: 'Alice', savings: 1000 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Alice')
+        expect(result.savings).toBe(1000)
+        expect(result).toBe(peoples[0]) // should be first Alice
+    })
+
+    it('should work with maximum savings at different positions', () => {
+        const testCases = [
+            // Max at beginning
+            [
+                { name: 'Max', savings: 2000 },
+                { name: 'Bob', savings: 1000 },
+                { name: 'Charlie', savings: 500 },
+            ],
+            // Max in middle
+            [
+                { name: 'Alice', savings: 500 },
+                { name: 'Max', savings: 2000 },
+                { name: 'Charlie', savings: 1000 },
+            ],
+            // Max at end
+            [
+                { name: 'Alice', savings: 500 },
+                { name: 'Bob', savings: 1000 },
+                { name: 'Max', savings: 2000 },
+            ],
+        ]
+
+        testCases.forEach((peoples, index) => {
+            const result = learnReduce(peoples)
+            expect(result.name).toBe('Max')
+            expect(result.savings).toBe(2000)
+        })
+    })
+
+    it('should handle special string characters in names', () => {
+        const peoples = [
+            { name: 'José María', savings: 1000 },
+            { name: 'François', savings: 1500 },
+            { name: '张三', savings: 800 },
+            { name: 'محمد', savings: 1200 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('François')
+        expect(result.savings).toBe(1500)
+    })
+
+    it('should handle empty string names', () => {
+        const peoples = [
+            { name: '', savings: 1000 },
+            { name: 'Bob', savings: 1500 },
+            { name: ' ', savings: 800 },
+        ]
+
+        const result = learnReduce(peoples)
+        expect(result.name).toBe('Bob')
+        expect(result.savings).toBe(1500)
     })
 })

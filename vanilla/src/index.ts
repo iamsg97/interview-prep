@@ -235,7 +235,7 @@ function delayedCounterAfain(n: number) {
  * @param peoples - An array of objects, each containing a `name` and `savings` property.
  * @returns The total sum of the `savings` values from all people in the array.
  */
-function learnReduce(peoples: { name: string; savings: number }[]) {
+export function learnReduce(peoples: { name: string; savings: number }[]) {
     const userWithMaxSaving = peoples.reduce((prev, curr) => {
         // loops over the peoples, curr is the ith index and prev is (i - 1)th index
         if (curr.savings > prev.savings) {
@@ -273,7 +273,7 @@ function learnReduce(peoples: { name: string; savings: number }[]) {
  * @param str - The string to validate.
  * @returns True if the string is valid, false otherwise.
  */
-function countFrequency(sentence: string) {
+export function countFrequency(sentence: string) {
     // acc -> what you want to do
     // in this it has to be a map
     return sentence
