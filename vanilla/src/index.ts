@@ -288,3 +288,23 @@ export function countFrequency(sentence: string) {
             return acc
         }, /** @description what is going to be the start value */ new Map<string, number>())
 }
+class DoNotTest {
+    findSum(num1: number, num2: number, num3: number) {
+        return num1 + num2 + num3
+    }
+}
+
+/** 
+ * This IIFE is used in this file to test methods which are part of the class `DoNotTest`
+ * @see DoNotTest
+ */
+;(() => {
+    const doNotTest = new DoNotTest()
+    /**
+     * @descripton Argument of type 'number[]' is not assignable to parameter of type '[number, number, number]'
+     * That's why it's mandatory in TS to add `[number, number, number]`
+     */
+    const numbers: [number, number, number] = [13, 56, 78]
+
+    doNotTest.findSum.apply(null, numbers)
+})()
