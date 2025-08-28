@@ -288,13 +288,55 @@ export function countFrequency(sentence: string) {
             return acc
         }, /** @description what is going to be the start value */ new Map<string, number>())
 }
+
+const logger = {
+    prefix: 'Log:',
+    log(message: string) {
+        console.log(`${this.prefix} ${message}`)
+    },
+}
+
+export function asyncInvoker(
+    messages: string[],
+    delay: number
+): Promise<string>[] {
+    const result: Promise<string>[] = []
+    const unboundedLogger = logger.log
+    for (let i = 0; i < messages.length; i++) {
+        result.push(
+            // biome-ignore lint/complexity/useArrowFunction: <explanation>
+            new Promise<string>(function (resolve) {
+                // biome-ignore lint/complexity/useArrowFunction: <explanation>
+                setTimeout(function () {
+                    // Call logger.log to print: "Log: <message>" after delay*i ms
+                    // But do NOT touch the logger or add extra properties to its object!
+                    // Use call/bind/apply and closure to pass context and args correctly.
+                    const boundedLogger = unboundedLogger.bind(
+                        logger,
+                        messages[i] ?? ''
+                    )
+                    boundedLogger()
+                    resolve(messages[i] ?? '') //
+                }, delay * i)
+            })
+        )
+    }
+    return result
+}
+
+// asyncInvoker(['A', 'B', 'C'], 200).forEach(p => p.then(console.log))
+/* prints (plus resolves):
+Log: A  (after 0ms)
+Log: B  (after 200ms)
+Log: C  (after 400ms) */
+
 class DoNotTest {
     findSum(num1: number, num2: number, num3: number) {
         return num1 + num2 + num3
     }
 }
 
-/** 
+/**
  * This IIFE is used in this file to test methods which are part of the class `DoNotTest`
  * @see DoNotTest
  */

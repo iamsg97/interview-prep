@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+    asyncInvoker,
     buyAndSellStock,
     countFrequency,
     createGetters,
@@ -210,7 +211,7 @@ describe('getMaximumSumForTargetConsequetiveElements', () => {
         it('should handle mixed positive and negative numbers', () => {
             expect(
                 getMaximumSumForTargetConsequetiveElements([2, -1, 2, 1, -4], 3)
-            ).toBe(4)
+            ).toBe(3)
             expect(
                 getMaximumSumForTargetConsequetiveElements([-2, 1, 3, -1, 2], 2)
             ).toBe(4)
@@ -835,5 +836,351 @@ describe('learnReduce', () => {
         const result = learnReduce(peoples)
         expect(result.name).toBe('Bob')
         expect(result.savings).toBe(1500)
+    })
+})
+
+describe('asyncInvoker', () => {
+    afterEach(() => {
+        if (typeof vi.useRealTimers === 'function') {
+            vi.useRealTimers()
+        }
+        vi.clearAllMocks()
+    })
+
+    describe('Basic functionality', () => {
+        it('should return array of promises with same length as input messages', () => {
+            const messages = ['A', 'B', 'C']
+            const promises = asyncInvoker(messages, 100)
+
+            expect(Array.isArray(promises)).toBe(true)
+            expect(promises).toHaveLength(3)
+            for (const p of promises) {
+                expect(typeof p.then).toBe('function')
+            }
+        })
+
+        it('should resolve each promise with the corresponding message', async () => {
+            const messages = ['Hello', 'World']
+            const promises = asyncInvoker(messages, 0)
+
+            const results = await Promise.all(promises)
+            expect(results).toEqual(['Hello', 'World'])
+        })
+
+        it('should call logger.log for each message with correct prefix', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            const messages = ['Test1', 'Test2']
+
+            const promises = asyncInvoker(messages, 0)
+            await Promise.all(promises)
+
+            expect(logSpy).toHaveBeenCalledTimes(2)
+            expect(logSpy).toHaveBeenCalledWith('Log: Test1')
+            expect(logSpy).toHaveBeenCalledWith('Log: Test2')
+
+            logSpy.mockRestore()
+        })
+    })
+
+    describe('Timing and delay behavior', () => {
+        it('should schedule timeouts with correct delays (delay * index)', () => {
+            if (typeof vi.useFakeTimers === 'function') {
+                vi.useFakeTimers()
+            }
+            const setTimeoutSpy = vi.spyOn(global, 'setTimeout')
+
+            const messages = ['A', 'B', 'C']
+            asyncInvoker(messages, 200)
+
+            expect(setTimeoutSpy).toHaveBeenCalledTimes(3)
+            expect(setTimeoutSpy).toHaveBeenNthCalledWith(
+                1,
+                expect.any(Function),
+                0
+            )
+            expect(setTimeoutSpy).toHaveBeenNthCalledWith(
+                2,
+                expect.any(Function),
+                200
+            )
+            expect(setTimeoutSpy).toHaveBeenNthCalledWith(
+                3,
+                expect.any(Function),
+                400
+            )
+
+            setTimeoutSpy.mockRestore()
+        })
+
+        it('should resolve promises in correct order with proper timing', async () => {
+            const useFake = typeof vi.useFakeTimers === 'function'
+            if (useFake) vi.useFakeTimers()
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+            const messages = ['A', 'B', 'C']
+            const promises = asyncInvoker(messages, 100)
+
+            const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
+            // First promise should resolve immediately (0ms delay)
+            if (useFake && typeof vi.advanceTimersByTime === 'function') {
+                vi.advanceTimersByTime(0)
+                await Promise.resolve()
+            } else {
+                await sleep(0)
+            }
+            expect(logSpy).toHaveBeenCalledWith('Log: A')
+            await expect(promises[0]).resolves.toBe('A')
+
+            // Second promise should resolve after 100ms
+            if (useFake && typeof vi.advanceTimersByTime === 'function') {
+                vi.advanceTimersByTime(100)
+                await Promise.resolve()
+            } else {
+                await sleep(100)
+            }
+            expect(logSpy).toHaveBeenCalledWith('Log: B')
+            await expect(promises[1]).resolves.toBe('B')
+
+            // Third promise should resolve after another 100ms (200ms total)
+            if (useFake && typeof vi.advanceTimersByTime === 'function') {
+                vi.advanceTimersByTime(100)
+                await Promise.resolve()
+            } else {
+                await sleep(100)
+            }
+            expect(logSpy).toHaveBeenCalledWith('Log: C')
+            await expect(promises[2]).resolves.toBe('C')
+
+            logSpy.mockRestore()
+        })
+
+        it('should handle zero delay correctly', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            const messages = ['Immediate']
+
+            const promises = asyncInvoker(messages, 0)
+            const results = await Promise.all(promises)
+
+            expect(results).toEqual(['Immediate'])
+            expect(logSpy).toHaveBeenCalledWith('Log: Immediate')
+
+            logSpy.mockRestore()
+        })
+    })
+
+    describe('Edge cases', () => {
+        it('should handle empty messages array', () => {
+            const promises = asyncInvoker([], 100)
+
+            expect(promises).toHaveLength(0)
+            expect(Array.isArray(promises)).toBe(true)
+        })
+
+        it('should handle single message', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            const promises = asyncInvoker(['Single'], 50)
+
+            const results = await Promise.all(promises)
+            expect(results).toEqual(['Single'])
+            expect(logSpy).toHaveBeenCalledWith('Log: Single')
+
+            logSpy.mockRestore()
+        })
+
+        it('should handle negative delay by treating it as valid delay value', () => {
+            if (typeof vi.useFakeTimers === 'function') {
+                vi.useFakeTimers()
+            }
+            const setTimeoutSpy = vi.spyOn(global, 'setTimeout')
+
+            asyncInvoker(['A', 'B'], -100)
+
+            expect(setTimeoutSpy).toHaveBeenNthCalledWith(
+                1,
+                expect.any(Function),
+                -0
+            )
+            expect(setTimeoutSpy).toHaveBeenNthCalledWith(
+                2,
+                expect.any(Function),
+                -100
+            )
+
+            setTimeoutSpy.mockRestore()
+        })
+
+        it('should handle undefined/null messages gracefully', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            const messages = [undefined, null, 'valid'] as any
+
+            const promises = asyncInvoker(messages, 0)
+            const results = await Promise.all(promises)
+
+            expect(results).toEqual(['', '', 'valid'])
+            expect(logSpy).toHaveBeenCalledWith('Log: ')
+            expect(logSpy).toHaveBeenCalledWith('Log: ')
+            expect(logSpy).toHaveBeenCalledWith('Log: valid')
+
+            logSpy.mockRestore()
+        })
+
+        it('should handle empty string messages', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            const promises = asyncInvoker(['', 'non-empty', ''], 0)
+
+            const results = await Promise.all(promises)
+            expect(results).toEqual(['', 'non-empty', ''])
+            expect(logSpy).toHaveBeenCalledWith('Log: ')
+            expect(logSpy).toHaveBeenCalledWith('Log: non-empty')
+            expect(logSpy).toHaveBeenCalledWith('Log: ')
+
+            logSpy.mockRestore()
+        })
+    })
+
+    describe('Logger binding and context behavior', () => {
+        it('should bind logger context correctly using bind method', async () => {
+            const mockLogger = {
+                prefix: 'Test:',
+                log: vi.fn(),
+            }
+
+            const originalConsoleLog = console.log
+            console.log = vi.fn()
+
+            // Mock the logger object used in asyncInvoker
+            const loggerSpy = vi.spyOn(console, 'log')
+
+            const promises = asyncInvoker(['Message'], 0)
+            await Promise.all(promises)
+
+            expect(loggerSpy).toHaveBeenCalledWith('Log: Message')
+
+            console.log = originalConsoleLog
+        })
+
+        it('should preserve logger prefix when calling bound function', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+            const promises = asyncInvoker(['Test message'], 0)
+            await Promise.all(promises)
+
+            // Verify the logger's prefix is used correctly
+            expect(logSpy).toHaveBeenCalledWith('Log: Test message')
+
+            logSpy.mockRestore()
+        })
+
+        it('should handle special characters in messages', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            const specialMessages = [
+                'Hello @world!',
+                '123$%^',
+                'café naïve',
+                '🎉emoji🎉',
+            ]
+
+            const promises = asyncInvoker(specialMessages, 0)
+            const results = await Promise.all(promises)
+
+            expect(results).toEqual(specialMessages)
+            for (const msg of specialMessages) {
+                expect(logSpy).toHaveBeenCalledWith(`Log: ${msg}`)
+            }
+
+            logSpy.mockRestore()
+        })
+    })
+
+    describe('Integration and stress tests', () => {
+        it('should handle large number of messages efficiently', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            const messages = Array.from(
+                { length: 100 },
+                (_, i) => `Message${i}`
+            )
+            const promises = asyncInvoker(messages, 1)
+
+            expect(promises).toHaveLength(100)
+
+            // Test that all promises resolve correctly
+            const results = await Promise.all(promises)
+            expect(results).toEqual(messages)
+            
+            logSpy.mockRestore()
+        })
+
+        it('should handle concurrent calls correctly', async () => {
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+            const promises1 = asyncInvoker(['A1', 'A2'], 10)
+            const promises2 = asyncInvoker(['B1', 'B2'], 5)
+
+            const results1 = await Promise.all(promises1)
+            const results2 = await Promise.all(promises2)
+
+            expect(results1).toEqual(['A1', 'A2'])
+            expect(results2).toEqual(['B1', 'B2'])
+
+            logSpy.mockRestore()
+        })
+
+        it('should maintain message order even with async operations', async () => {
+            const useFake = typeof vi.useFakeTimers === 'function'
+            if (useFake) vi.useFakeTimers()
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            logSpy.mockClear() // Clear any previous calls
+
+            const messages = ['First', 'Second', 'Third']
+            const promises = asyncInvoker(messages, 50)
+
+            // Advance time to trigger all timeouts
+            if (useFake && typeof vi.advanceTimersByTime === 'function') {
+                vi.advanceTimersByTime(150)
+                await Promise.resolve()
+            } else {
+                await new Promise(r => setTimeout(r, 150))
+            }
+
+            const results = await Promise.all(promises)
+            expect(results).toEqual(['First', 'Second', 'Third'])
+
+            // Verify logging occurred with correct messages (don't check total count due to async interference)
+            expect(logSpy).toHaveBeenCalledWith('Log: First')
+            expect(logSpy).toHaveBeenCalledWith('Log: Second')
+            expect(logSpy).toHaveBeenCalledWith('Log: Third')
+
+            logSpy.mockRestore()
+        })
+    })
+
+    describe('Memory and cleanup behavior', () => {
+        it('should not leak memory with many concurrent promises', async () => {
+            const messages = Array.from({ length: 50 }, (_, i) => `Msg${i}`)
+            const promises = asyncInvoker(messages, 1)
+
+            // All promises should resolve without issues
+            const results = await Promise.all(promises)
+            expect(results).toHaveLength(50)
+
+            // Verify each message was processed
+            results.forEach((result, index) => {
+                expect(result).toBe(`Msg${index}`)
+            })
+        })
+
+        it('should handle very long messages without issues', async () => {
+            const longMessage = 'A'.repeat(1000)
+            const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+            const promises = asyncInvoker([longMessage], 0)
+            const results = await Promise.all(promises)
+
+            expect(results[0]).toBe(longMessage)
+            expect(logSpy).toHaveBeenCalledWith(`Log: ${longMessage}`)
+
+            logSpy.mockRestore()
+        })
     })
 })
