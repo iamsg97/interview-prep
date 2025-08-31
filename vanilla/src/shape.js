@@ -26,8 +26,13 @@ function Rectangle(width, height) {
     this.height = height
     Shape.call(this, 'Rectangle')
 }
-
+// Child.prototype = Object.create(Parent.prototype) - here the constructor is lost, we need to fix it
 Rectangle.prototype = Object.create(Shape.prototype)
+// Fix the constructor
+// When we do Rectangle.prototype = Object.create(Shape.prototype),
+// the constructor property of Rectangle.prototype is set to Shape (the constructor of the prototype object).
+// Child.prototype.constructor = Child [IMPORTANT]
+// Now Rectangle.prototype.constructor points to Rectangle
 Rectangle.prototype.constructor = Rectangle
 
 /**
