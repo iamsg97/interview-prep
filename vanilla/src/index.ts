@@ -236,14 +236,13 @@ function delayedCounterAfain(n: number) {
  * @returns The total sum of the `savings` values from all people in the array.
  */
 export function learnReduce(peoples: { name: string; savings: number }[]) {
-    const userWithMaxSaving = peoples.reduce((prev, curr) => {
+    return peoples.reduce((prev, curr) => {
         // loops over the peoples, curr is the ith index and prev is (i - 1)th index
         if (curr.savings > prev.savings) {
             return curr
         }
         return prev
     })
-    return userWithMaxSaving
 }
 
 /**
@@ -323,6 +322,59 @@ export function asyncInvoker(
     }
     return result
 }
+
+function Animal(this: { name: string }, name: string) {
+    this.name = name
+}
+Animal.prototype.speak = function () {
+    return this.name + ' makes a sound.'
+}
+
+function Dog(
+    this: { name: string; breed: string },
+    name: string,
+    breed: string
+) {
+    // Animal.apply(Dog, [name]) --> works too
+    Animal.call(Dog, name)
+    this.breed = breed
+}
+
+/**
+ * @description The line sets up the prototype chain for the `Dog` class to inherit from the `Animal` class.
+ * By using `Object.create(Animal.prototype)`, it creates a new object that has `Animal.prototype` as its prototype,
+ * effectively allowing instances of `Dog` to access methods defined on `Animal.prototype`.
+ * This is the pattern in JavaScript to achieve classical inheritance before the introduction of ES6 classes.
+ * @template Below code is from ES6 class syntax
+ * class Dog extends Animal {
+ *     constructor(name, breed) {
+ *         super(name);
+ *         this.breed = breed;
+ *     }
+ * }
+ */
+Dog.prototype = Object.create(Animal.prototype)
+/**
+ * @description The line sets the `constructor` property of `Dog.prototype` to the `Dog` function itself.
+ * This is necessary after manually setting up inheritance with `Object.create`,
+ * because that operation overwrites the `constructor` property to point to the parent (`Animal`).
+ * Restoring it ensures that instances of `Dog` correctly reference `Dog` as their constructor, which is important for type checks and instance creation.
+ */
+Dog.prototype.constructor = Dog
+
+Dog.prototype.speak = function () {
+    /**
+     * @description Here, `Animal.prototype.speak.call(this)` is used to invoke the `speak` method from the `Animal` class,
+     * ensuring that it is called in the context of the current `Dog` instance (`this`).
+     * This allows the `Dog` instance to access properties defined in the `Animal` class, such as `name`.
+     * The result of this call is then included in the return string to provide additional context about what the parent class's method would output.
+     */
+    return `${this.name} the ${this.breed} barks. [Parent says: ${Animal.prototype.speak.call(this)}]`
+}
+
+// const dog = new Dog('Rex', 'Boxer')
+// console.log(dog.speak())
+// Should print: "Rex the Boxer barks. [Parent says: Rex makes a sound.]"
 
 // asyncInvoker(['A', 'B', 'C'], 200).forEach(p => p.then(console.log))
 /* prints (plus resolves):
