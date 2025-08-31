@@ -15,6 +15,7 @@
   "scripts": {
     "prepare": "husky",
     "run": "bun run src/index.ts",
+    "run:js:shape": "bun run src/shape.js",
     "test": "vitest"
   }
 }
