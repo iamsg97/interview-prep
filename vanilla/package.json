@@ -1,19 +1,20 @@
 {
-    "name": "vanilla",
-    "module": "index.ts",
-    "type": "module",
-    "private": true,
-    "devDependencies": {
-        "@types/bun": "latest",
-        "husky": "^9.1.7",
-        "prettier": "^3.6.2",
-        "vitest": "^3.2.4"
-    },
-    "peerDependencies": {
-        "typescript": "^5"
-    },
-    "scripts": {
-        "prepare": "husky",
-        "test": "vitest"
-    }
+  "name": "vanilla",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "run": "bun run src/index.ts",
+    "test": "vitest"
+  }
 }
