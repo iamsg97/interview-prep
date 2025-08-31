@@ -376,12 +376,6 @@ Dog.prototype.speak = function () {
 // console.log(dog.speak())
 // Should print: "Rex the Boxer barks. [Parent says: Rex makes a sound.]"
 
-// asyncInvoker(['A', 'B', 'C'], 200).forEach(p => p.then(console.log))
-/* prints (plus resolves):
-Log: A  (after 0ms)
-Log: B  (after 200ms)
-Log: C  (after 400ms) */
-
 class DoNotTest {
     findSum(num1: number, num2: number, num3: number) {
         return num1 + num2 + num3
