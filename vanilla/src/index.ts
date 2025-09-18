@@ -380,6 +380,12 @@ class DoNotTest {
     findSum(num1: number, num2: number, num3: number) {
         return num1 + num2 + num3
     }
+
+    repeatAction(action: (n: number) => void, times: number) {
+        for (let i = 0; i < times; i++) {
+            action(i)
+        }
+    }
 }
 
 /**
@@ -395,4 +401,10 @@ class DoNotTest {
     const numbers: [number, number, number] = [13, 56, 78]
 
     doNotTest.findSum.apply(null, numbers)
+
+    /**
+     * @description Here we are learning about Higher Order Functions (HOF)
+     * @see repeatAction()
+     */
+    doNotTest.repeatAction(n => console.log(`Action executed for ${n}`), 5)
 })()
