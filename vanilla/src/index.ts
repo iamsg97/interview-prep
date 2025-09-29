@@ -269,8 +269,8 @@ export function learnReduce(peoples: { name: string; savings: number }[]) {
  */
 /**
  * Checks if the input string contains valid, closable parentheses/braces/brackets.
- * @param str - The string to validate.
  * @returns True if the string is valid, false otherwise.
+ * @param sentence {string}
  */
 export function countFrequency(sentence: string) {
     // acc -> what you want to do
